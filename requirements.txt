@@ -1,0 +1,12 @@
+param==1.9.1
+panel==0.6.0
+pandas==0.24.2
+numpy==1.16.4
+holoviews==1.12.3
+bokeh==1.2.0
+hvplot==0.4.0
+
+datashader==0.7.0
+
+
+
