@@ -12,6 +12,10 @@ from holoviews.plotting.links import RangeToolLink
 from holoviews.streams import Params, Pipe, Buffer
 import datetime as dt
 from bokeh.server.server import Server
+import boto3
+import os
+import sys
+from io import StringIO
 hv.extension('bokeh')
 pn.extension()
 
@@ -20,6 +24,18 @@ pn.extension()
 ### This section contains defaults and ranges for the Bokeh controls and  ###
 ### may be modified without concern, if required. ("View" Part 1)         ###
 ###-----------------------------------------------------------------------###
+
+aws_id = os.environ['AWS_ID']
+aws_secret = os.environ['AWS_SECRET']
+
+client = boto3.client('s3', aws_access_key_id=aws_id,
+        aws_secret_access_key=aws_secret)
+bucket_name = 'alamo7-inverters'
+object_key = 'full_csv_with_difference.csv'
+csv_obj = client.get_object(Bucket=bucket_name, Key=object_key)
+
+body = csv_obj['Body']
+csv_string = body.read().decode('utf-8')
 
 default_start_date = dt.datetime(2017, 1, 1)
 default_end_date = dt.datetime(2018, 1, 30)
@@ -41,7 +57,7 @@ framewise = True
 #this is covered by our explorer class
 idx = pd.IndexSlice
 #bring the data in from the csv
-combined_df = pd.read_csv('data/combined_reactive_data.csv')
+combined_df = pd.read_csv(StringIO(csv_string))
 combined_df['Timestamp'] = pd.to_datetime(combined_df['Timestamp'])
 grouped_df = pd.DataFrame(combined_df.groupby(['Inverter', 'Timestamp']).sum())
 class ReactiveExplorer(param.Parameterized):
